@@ -1,0 +1,84 @@
+#Sample code for Code Fellow RoR bootcamp
+#18-19 June 2013 by Kathryn Blackley
+
+#Project Euler solutions in R
+
+#Problem 28: Number Spiral Diagonals
+#http://projecteuler.net/problem=28
+
+dimensions = 1001 											#dimensions of the spiral in the question
+
+iterations = floor(dimensions/2)									#number of times thru the loop
+collectingMatrix = matrix(0, nrow = iterations, ncol = 4)					#matrix to collect values as they are calculated
+difference = 2												#first difference between the corners of the spiral
+for (iterations in 1:iterations){									#begin loop calculating corners of the spiral going outwards
+	end = (1 + iterations*2)^2									#find the highest number in the first set of four corners, noticing they are squares of odd numbers
+	start = end - 3*difference									#find the lowest number in the first set of four corners
+	collectingMatrix[iterations,] = seq (from = start, to = end, by = difference)	#take the sequence between the lowest and the highest numbers based on the length of the sides
+	difference = difference+2									#increase the length of the sides moving outward on the spiral
+}
+sum(collectingMatrix)+1											#answer: sum all the numbers collected plus 1, the center of the spiral
+
+
+
+
+
+
+#Problem 42: Coded Triangle Numbers
+#http://projecteuler.net/problem=42
+
+data = scan(file="http://projecteuler.net/project/words.txt", sep = ",", what = "character")	#read in data from Project Euler's text file
+alphabet = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", 
+"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")							#vector of the characters of the alphabet
+dataLength = length(data)												#how many words are in the data
+wordValues = rep (0, dataLength)											#empty vector of zeros to fill with the words' values
+for (i in 1:dataLength){												#start loop to calculate value of each word
+	letters = strsplit(data[i], split = "")									#split string into individual letters, produce a list with one element
+	lettersVect = letters[[1]]											#get the vector of letters from the first element of the list
+	lettersLength=length(lettersVect)										#find how many letters are in the world
+	for (j in 1:lettersLength){											#start loop through each letter
+		wordValues[i] = wordValues[i]+ (which (alphabet[] == lettersVect[j]))			#as each letter is translated to a number, add that number to the existing value for that word					
+	}	
+}
+maxValue = max(wordValues)												#find the maximum word value				
+maxToTri = floor(sqrt(maxValue*2))											#find the maximum number whose triangle number should be calculated based on the maximum word value
+numbersToTri = 1:maxToTri												#vector of numbers whose triangle numbers will be calculated
+triangleNumbers = (numbersToTri*(numbersToTri+1))/2								#calculating the triangle numbers		
+sum(wordValues%in%triangleNumbers)											#answer: find the number of instances where it's TRUE that the word value appears in the vector of triangle numbers
+
+
+
+
+#Problem 55: Lychrel numbers
+#http://projecteuler.net/problem=55
+
+#tests whether a number is a palindrome
+palindromeTest = function(number){
+	digits = strsplit(as.character(number), split = "")												#makes the number a string and splits up string into substrings (digits), output is a list with one element
+	digitsVect = digits[[1]]																#takes the vector of the digit out of the first element of the list
+	digitsLength = length(digitsVect)															#finds the number of digits
+	if (digitsLength < 2){																	#takes care of single-digit numbers since the rest of the function cannot deal with them
+		return(TRUE)
+	}else{
+		digitCheck = sum(digitsVect[1:(floor(digitsLength/2))]==digitsVect[digitsLength:(ceiling((digitsLength+2)/2))])	#checks whether the appropriate digits are the same as each other or not
+		return(digitCheck==(floor(digitsLength/2)))												#if the number of pairs of digits that are the same equals the number of pairs of digits checked, then it's a palindrome
+	}
+}
+
+#takes a numeric input, reverses the digits, and outputs the resulting number
+reverseNumber = function(number){
+	digits = strsplit(as.character(number), split = "")										#makes the number a string and splits up string into substrings (digits), output is a list with one element
+	digitsVect = digits[[1]]														#takes the vector of the digit out of the first element of the list
+	revDigitsVect = rev(digitsVect)													#finds the number of digits
+	revString = paste(revDigitsVect, collapse = "")											#reverses the digits and outputs them as a single string
+	revNum = as.numeric(revString)													#makes the string into a numeric
+	return(revNum)																#returns the numeric
+}
+
+vectA = 1:10000																	#vector of numbers <10000, which are the ones the question wants us to check
+for (i in 1:30){																	#interates through 30 times; R cannot store the large integers that 50 iterations would produce (and 30 turns out to be enough to find the correct answer) 
+	vectB = vectA + sapply(X = vectA, FUN = reverseNumber, simplify = TRUE)							#takes vectA, reverses all the numbers and adds them to the corresponding value in vectA
+	vectA = vectB[which(sapply(X = vectB, FUN = palindromeTest, simplify = TRUE) == FALSE)]				#only keeps numbers that are not palindromes, creating the new vectA
+}
+length(vectA)																	#answer: length of vectA, which is how many numbers never resolved to a palindrome
+
